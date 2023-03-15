@@ -2,16 +2,29 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
-#define DEBUG true    // Define a boolean constant named DEBUG and set it to true
+// --------------------------------------
+// DO NOT CHANGE ANYTHING ABOVE THIS LINE
+// IF YOU DO NOT KNOW WHAT YOU ARE DOING
 #define stationID 1   // Define an integer constant named stationID and set it to 1
 
-// WIFI Defines
+#define WIFISSID "Test"  // Define a string constant named WIFISSID and set it to the wifi SSID
+#define WIFIPASS "test1234"  // Define a string constant named WIFIPASS and set it to the wifi password
+
+#define WEBSERVERIP "10.42.0.1" // Define a string constant named WEBSERVERIP and set it to the IP address of the web server
+#define WEBSERVERPORT "3000"      // Define an string constant named WEBSERVERPORT and set it to the port of the web server
+
+#define DEBUG true    // Define a boolean constant named DEBUG and set to true or false to enable or disable debug messages
+// DO NOT CHANGE ANYTHING BELOW THIS LINE
+// IF YOU DO NOT KNOW WHAT YOU ARE DOING
+// --------------------------------------
+
+// WIFI pin defines
 #define rxPin 5       // Define an integer constant named rxPin and set it to 5
 #define txPin 6       // Define an integer constant named txPin and set it to 6
 
 SoftwareSerial esp = SoftwareSerial(rxPin, txPin);  // Create a SoftwareSerial object named esp using rxPin and txPin
 
-// RFID Defines
+// RFID pin defines
 #define SSPin 10      // Define an integer constant named SSPin and set it to 10
 #define RSTPin 9      // Define an integer constant named RSTPin and set it to 9
 
@@ -33,8 +46,8 @@ void setup() {
 
   sendATCommand("AT+RST",1000,"OK");    // Send an AT command to reset the module
   sendATCommand("AT+CWMODE=1",1000,"OK"); // Send an AT command to set the WIFI mode
-  sendATCommand("AT+CWJAP=\"Test\",\"test1234\"",10000,"WIFI CONNECTED"); // Send an AT command to connect to a WIFI network
-  sendATCommand("AT+CIPMUX=1",5000,"asdasdas"); // Send an AT command to set up the connection mode
+  sendATCommand("AT+CWJAR=\""+WIFISSID+"\",\""+WIFIPASS+"\"",10000,"WIFI CONNECTED"); // Send an AT command to connect to a WIFI network
+  sendATCommand("AT+CIPMUX=1",5000,"---------"); // Send an AT command to set up the connection mode
 }
 
 void loop() {
@@ -45,12 +58,12 @@ void loop() {
 }
 
 void sendHTTP(String cartID){
-  if(!sendATCommand("AT+CIPSTART=0,\"TCP\",\"10.42.0.1\",3000",3000,"CONNECT")){ // Check if the ESP8266 connects to the server within 3000ms
+  if(!sendATCommand("AT+CIPSTART=0,\"TCP\",\""+WEBSERVERIP+"\","+WEBSERVERPORT,3000,"CONNECT")){ // Check if the ESP8266 connects to the server within 3000ms
     Serial.println("Failed to connect to master");  // If not, print a message to the serial monitor and return
     return;
   }
 
-  String cmd = "GET /"+String(stationID)+"/"+String(cartID)+" HTTP/1.1\r\nHost: 10.42.0.1\r\n\r\n"; // Construct an HTTP request string
+  String cmd = "GET /"+String(stationID)+"/"+String(cartID)+" HTTP/1.1\r\nHost: "+WEBSERVERIP+"\r\n\r\n"; // Construct an HTTP request string
 
   sendATCommand("AT+CIPSEND=0,"+String(cmd.length()),5000,">");  // Send an AT command to set up the data transmission
   sendATCommand(cmd,5000,"true");  // Send the HTTP request
@@ -93,8 +106,10 @@ String GetID()
     }
 
     // Print the UID to the serial monitor
-    Serial.print("UID tag: ");
-    Serial.println(uidString);
+    if(DEBUG){
+      Serial.print("UID tag: ");
+      Serial.println(uidString);
+    }
 
     // Stop reading the card and return the UID
     rfid.PICC_HaltA();
