@@ -5,7 +5,7 @@
 // --------------------------------------
 // DO NOT CHANGE ANYTHING ABOVE THIS LINE
 // IF YOU DO NOT KNOW WHAT YOU ARE DOING
-#define stationID 1   // Define an integer constant named stationID and set it to 1
+#define stationID 1   // Define an integer constant named stationID and set it to the id of the station
 
 #define WIFISSID "Test"  // Define a string constant named WIFISSID and set it to the wifi SSID
 #define WIFIPASS "test1234"  // Define a string constant named WIFIPASS and set it to the wifi password
@@ -40,13 +40,13 @@ void setup() {
   SPI.begin();     // Initialize the SPI communication
   rfid.PCD_Init(); // Initialize the RFID module
 
-  if(!sendATCommand("AT",2000,"OK")){  // Check if the WIFI module responds to the AT command within 2000ms
+  if(!sendATCommand("AT",2000,"OK")){ // Check if the WIFI module responds to the AT command within 2000ms
     Serial.println("No response from wifi module");  // If not, print a message to the serial monitor
   }
 
   sendATCommand("AT+RST",1000,"OK");    // Send an AT command to reset the module
   sendATCommand("AT+CWMODE=1",1000,"OK"); // Send an AT command to set the WIFI mode
-  sendATCommand("AT+CWJAR=\""+WIFISSID+"\",\""+WIFIPASS+"\"",10000,"WIFI CONNECTED"); // Send an AT command to connect to a WIFI network
+  sendATCommand("AT+CWJAR=\""+String(WIFISSID)+"\",\""+String(WIFIPASS)+"\"",10000,"WIFI CONNECTED"); // Send an AT command to connect to a WIFI network
   sendATCommand("AT+CIPMUX=1",5000,"---------"); // Send an AT command to set up the connection mode
 }
 
@@ -58,7 +58,7 @@ void loop() {
 }
 
 void sendHTTP(String cartID){
-  if(!sendATCommand("AT+CIPSTART=0,\"TCP\",\""+WEBSERVERIP+"\","+WEBSERVERPORT,3000,"CONNECT")){ // Check if the ESP8266 connects to the server within 3000ms
+  if(!sendATCommand("AT+CIPSTART=0,\"TCP\",\""+String(WEBSERVERIP)+"\","+String(WEBSERVERPORT),3000,"CONNECT")){ // Check if the ESP8266 connects to the server within 3000ms
     Serial.println("Failed to connect to master");  // If not, print a message to the serial monitor and return
     return;
   }
@@ -68,7 +68,7 @@ void sendHTTP(String cartID){
   sendATCommand("AT+CIPSEND=0,"+String(cmd.length()),5000,">");  // Send an AT command to set up the data transmission
   sendATCommand(cmd,5000,"true");  // Send the HTTP request
   sendATCommand("AT+CIPCLOSE=0",5000,"CLOSED");  // Close the connection
-
+}
 // This function sends an AT command to the ESP8266 wifi module and waits for an expected response
 bool sendATCommand(String command, int timeout, String expectedResponse) {
   String response = "";
@@ -95,8 +95,7 @@ bool sendATCommand(String command, int timeout, String expectedResponse) {
 }
 
 // This function reads the RFID tag and returns the UID as a string
-String GetID()
-{
+String GetID(){
   if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) { // If a new card is present
     String uidString = "";
 
