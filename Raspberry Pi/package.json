@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsnd --respawn ./src/index.ts"
+    "start:dev": "tsnd --respawn ./src/index.ts",
+    "build:start": "tsc && node ./dist/index.js"
   },
   "keywords": [],
   "author": "",

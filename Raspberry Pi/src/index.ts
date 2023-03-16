@@ -18,6 +18,8 @@ const WebServerPort = 3000
 // The IP address of the PLC
 const PLCIP = "192.168.0.1"
 
+// The number of the Datablock in the PLC
+const DBNumber = 1
 // DO NOT EDIT BELOW THIS LINE
 // ---------------------------
 
@@ -52,7 +54,7 @@ app.get('/:station/:vehicleId', (req, res) => {
         if (station <= 0) { return }
         
         // Write the vehicle ID to the PLC at the specified station
-        client.DBWrite(1, (station - 1) * 2, 2, buffer)
+        client.DBWrite(DBNumber, (station - 1) * 2, 2, buffer)
 
         // Disconnect from the PLC
         client.Disconnect()
